@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Naukri Profile Booster",
+  "description": "Automatically keeps your Naukri profile active with refresh automation, resume re-upload, and profile insights.",
+  "version": "1.0.0",
+  "permissions": [
+    "storage",
+    "alarms",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*.naukri.com/*",
+    "https://naukri.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Naukri Profile Booster",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.naukri.com/*",
+        "https://naukri.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
