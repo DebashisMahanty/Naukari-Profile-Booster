@@ -1,0 +1,110 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f4f7ff;
+  min-width: 340px;
+}
+
+.popup {
+  padding: 14px;
+  color: #15223b;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.status-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.badge {
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-muted { background: #e7edf9; }
+.badge-ok { background: #d8f7e4; color: #157441; }
+.badge-warn { background: #ffe9d5; color: #8c4600; }
+.badge-trial { background: #efe7ff; color: #4f2fa7; }
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 12px;
+  box-shadow: 0 4px 20px rgba(31, 58, 147, 0.08);
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.metric:last-child {
+  margin-bottom: 0;
+}
+
+.metric label {
+  font-size: 12px;
+  color: #5d6f93;
+}
+
+.metric strong {
+  font-size: 13px;
+}
+
+.actions {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.primary {
+  background: linear-gradient(110deg, #2659ff, #5037ff);
+  color: #fff;
+}
+
+.secondary {
+  background: #e9efff;
+  color: #1d3f9a;
+}
+
+.link {
+  background: transparent;
+  color: #5037ff;
+  text-decoration: underline;
+  padding: 4px;
+}
+
+.hint {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #5d6f93;
+}
+
+.footer {
+  margin-top: 6px;
+}
+
+.hidden {
+  display: none;
+}

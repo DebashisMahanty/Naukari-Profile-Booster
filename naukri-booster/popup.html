@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Naukri Profile Booster</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <header class="header">
+        <h1>Naukri Profile Booster</h1>
+        <div class="status-row">
+          <span id="loginStatus" class="badge badge-muted">Checking login...</span>
+          <span id="trialStatus" class="badge badge-trial">Trial...</span>
+        </div>
+      </header>
+
+      <section class="card">
+        <div class="metric">
+          <label>Profile Views</label>
+          <strong id="profileViews">—</strong>
+        </div>
+        <div class="metric">
+          <label>Last Refresh</label>
+          <strong id="lastRefresh">Never</strong>
+        </div>
+        <div class="metric">
+          <label>Next Refresh</label>
+          <strong id="nextRefresh">—</strong>
+        </div>
+      </section>
+
+      <section class="actions">
+        <button id="refreshNowBtn" class="primary">Refresh Now</button>
+        <button id="selectResumeBtn" class="secondary">Select Resume</button>
+        <p id="resumeMeta" class="hint">No resume selected.</p>
+      </section>
+
+      <footer class="footer">
+        <button id="upgradeBtn" class="link hidden">Upgrade to unlock manual refresh</button>
+      </footer>
+    </main>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
