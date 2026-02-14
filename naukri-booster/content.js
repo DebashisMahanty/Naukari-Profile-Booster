@@ -1,4 +1,9 @@
 (() => {
+  const STATUS = {
+    LOGGED_IN: "logged_in",
+    LOGGED_OUT: "logged_out"
+  };
+
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const randomDelay = () => Math.floor(Math.random() * 4000) + 2000;
 
@@ -39,8 +44,6 @@
     const uploadResult = await tryResumeUpload();
     if (!uploadResult.success) {
       console.warn("[NPB:content] Resume upload skipped or failed:", uploadResult.reason);
-    } else {
-      console.info("[NPB:content] Resume upload succeeded.");
     }
 
     await delay(1200);
@@ -57,7 +60,12 @@
   function detectLoggedIn() {
     const pageText = document.body?.innerText?.toLowerCase() || "";
     const hasLoginPrompt = ["login", "sign in", "forgot password"].some((needle) => pageText.includes(needle));
-    const hasProfileSignals = ["profile", "resume", "update profile", "naukri"].some((needle) => pageText.includes(needle));
+    const hasProfileSignals = [
+      "profile",
+      "resume",
+      "update profile",
+      "naukri"
+    ].some((needle) => pageText.includes(needle));
 
     const signInButton = document.querySelector('a[href*="/login"], button[id*="login"], .login');
     if (signInButton && !hasProfileSignals) {
@@ -116,11 +124,6 @@
       return { success: false, reason: "Resume handle not configured." };
     }
 
-    const permission = await ensureFilePermission(resumeFileHandle);
-    if (!permission) {
-      return { success: false, reason: "File permission not granted for selected resume." };
-    }
-
     let file;
     try {
       file = await resumeFileHandle.getFile();
@@ -128,121 +131,48 @@
       return { success: false, reason: "Resume file is missing or permission revoked." };
     }
 
-    const input = await getResumeFileInput();
+    const input = await waitForFileInput();
     if (!input) {
-      return { success: false, reason: "Resume file input not found on profile page." };
+      return { success: false, reason: "File input not found." };
     }
 
     const dt = new DataTransfer();
     dt.items.add(file);
+    input.files = dt.files;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
 
-    try {
-      input.files = dt.files;
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-      input.dispatchEvent(new Event("change", { bubbles: true }));
-    } catch {
-      return { success: false, reason: "Failed to attach resume to upload input." };
-    }
-
-    await delay(1000);
-    return { success: true, reason: "Resume attached and change event dispatched." };
+    return { success: true, reason: "Uploaded." };
   }
 
-  async function ensureFilePermission(handle) {
-    if (!handle?.queryPermission) {
-      return true;
-    }
-
-    const readPermission = await handle.queryPermission({ mode: "read" });
-    if (readPermission === "granted") {
-      return true;
-    }
-
-    const requested = await handle.requestPermission({ mode: "read" });
-    return requested === "granted";
-  }
-
-  async function getResumeFileInput(timeoutMs = 12000) {
-    const existingInput = findBestResumeInput();
-    if (existingInput) {
-      return existingInput;
-    }
-
-    const resumeTriggers = findResumeTriggers();
-    for (const trigger of resumeTriggers) {
-      safeClick(trigger);
-      await delay(350);
-
-      const input = findBestResumeInput();
-      if (input) {
-        return input;
-      }
-    }
-
+  async function waitForFileInput(timeoutMs = 10000) {
     const startedAt = Date.now();
     while (Date.now() - startedAt < timeoutMs) {
-      const input = findBestResumeInput();
-      if (input) {
-        return input;
+      const direct = document.querySelector('input[type="file"]');
+      if (direct) {
+        return direct;
       }
-      await delay(250);
+
+      const fuzzy = [...document.querySelectorAll("label, button, span, a")].find((node) => {
+        const text = (node.innerText || node.textContent || "").toLowerCase();
+        return text.includes("resume") || text.includes("upload");
+      });
+
+      if (fuzzy) {
+        safeClick(fuzzy);
+      }
+
+      const inputAfter = document.querySelector('input[type="file"]');
+      if (inputAfter) {
+        return inputAfter;
+      }
+
+      await delay(300);
     }
 
     return null;
   }
 
-  function findBestResumeInput() {
-    const allInputs = [...document.querySelectorAll('input[type="file"]')];
-    if (!allInputs.length) {
-      return null;
-    }
-
-    const resumeInput = allInputs.find((input) => {
-      const context = [
-        input.accept,
-        input.id,
-        input.name,
-        input.className,
-        input.getAttribute("aria-label") || "",
-        input.closest("section,div,form")?.innerText?.slice(0, 300) || ""
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      const hasResumeSignal = ["resume", "cv", ".pdf", ".doc", "upload"].some((needle) => context.includes(needle));
-      return hasResumeSignal;
-    });
-
-    return resumeInput || allInputs[0] || null;
-  }
-
-  function findResumeTriggers() {
-    const selectors = ["button", "a", "span", "label", "div[role='button']"];
-    const triggers = [];
-
-    for (const selector of selectors) {
-      const nodes = [...document.querySelectorAll(selector)].filter((node) => {
-        const text = (node.innerText || node.textContent || "").toLowerCase().trim();
-        return text && (
-          text.includes("update resume") ||
-          text === "update" ||
-          text.includes("upload resume") ||
-          text.includes("resume")
-        );
-      });
-      triggers.push(...nodes);
-    }
-
-    return [...new Set(triggers)];
-  }
-
   function safeClick(node) {
-    try {
-      node.scrollIntoView({ block: "center", behavior: "instant" });
-    } catch {
-      // Ignore scroll failures.
-    }
-
     try {
       node.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     } catch {
